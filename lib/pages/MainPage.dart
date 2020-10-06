@@ -1,3 +1,4 @@
+import 'package:chat_poc/models/Global.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chat_poc/components/CustomTabBar.dart';
@@ -22,6 +23,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   _MainPageState({this.category});
 
+  setLoggedInUser() async {
+    //setting current user as dummyUsers[i]
+    Global.loggedInUser = Global.dummyUsers[0];
+    Global.toChatUser = Global.dummyUsers[1];
+  }
+
   @override
   void initState() {
     print('Category $category');
@@ -30,6 +37,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       print('Tab Controller index ${_tabController.index}');
     });
     super.initState();
+    Global.initDummyUsers();
+    setLoggedInUser();
   }
 
   @override
@@ -91,8 +100,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             ChatList(category: category),
             ChatPage(
               // group: Group(name: 'Hostels', groupID: "999"),
-              contact1: Examples.users[1], // Current User
-              contact2: Examples.users[0], // To User
+              contact: Examples.users[1], // To User
             ),
             Center(child: Text('This is the Plugins tab')),
           ],

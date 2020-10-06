@@ -1,5 +1,4 @@
 import 'package:chat_poc/models/Examples.dart';
-
 import 'User.dart';
 import 'SocketUtils.dart';
 

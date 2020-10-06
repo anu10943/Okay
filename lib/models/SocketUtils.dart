@@ -12,7 +12,7 @@ class SocketUtils {
 
   initSocket(User user) async {
     // this.currentUser = user;
-    currentUser = users[1]; // run as 1 2 3 in different devices
+    currentUser = user; // run as 1 2 3 in different devices
     print('CURRENT USER: ${currentUser.userID}');
 
     await init();
@@ -34,24 +34,13 @@ class SocketUtils {
     print("Connecting to socket...");
     socketIO.connect();
   }
-  // socketIO.subscribe('receive_message', (jsonData) {
-  //   // Map<String, dynamic> data = json.decode(jsonData);
-  //   print(jsonData);
-  //   // messages.add(Message(
-  //   //   content: data["content"],
-  //   //   senderID: data["senderChatID"],
-  //   //   recipientID: data["receiverChatID"],
-  //   //   time: DateFormat.jm().format(DateTime.now()),
-  //   // ));
-  //   print(messages.length);
-  // });
 
-  void sendMessage(Message message) {
+  sendMessage(Message message) {
     if (null == socketIO) {
       print("Socket is Null, Cannot send message");
       return;
     }
-    print('To send message $message');
+    print('Send message $message to ${message.recipientID}');
     socketIO.sendMessage(
       'send_message',
       json.encode({
@@ -68,5 +57,12 @@ class SocketUtils {
       print("Received $data");
       onChatMessageReceived(data);
     });
+  }
+
+  closeConnection() {
+    if (null != socketIO) {
+      print("Close Connection");
+      socketIO.disconnect();
+    }
   }
 }

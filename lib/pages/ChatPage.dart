@@ -7,27 +7,25 @@ import 'package:chat_poc/models/Group.dart';
 import 'package:intl/intl.dart';
 
 class ChatPage extends StatefulWidget {
-  final User contact1;
-  final User contact2;
+  final User contact;
   final Group group;
 
-  ChatPage({this.contact1, this.contact2, this.group});
+  ChatPage({this.contact, this.group});
 
   @override
-  _ChatPageState createState() => _ChatPageState(
-      contact1: this.contact1, contact2: this.contact2, group: this.group);
+  _ChatPageState createState() =>
+      _ChatPageState(contact: this.contact, group: this.group);
 }
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController myController = TextEditingController();
-  final User contact1;
-  final User contact2;
+  final User contact;
   final Group group;
   String content;
   String roomID;
   List<Message> localMessages;
 
-  _ChatPageState({this.contact1, this.contact2, this.group});
+  _ChatPageState({this.contact, this.group});
 
   void onTextChange() {
     setState(() {
@@ -49,8 +47,8 @@ class _ChatPageState extends State<ChatPage> {
     print('In send button tap');
 
     Message message = Message(
-      recipientID: contact2.userID,
-      senderID: contact1.userID,
+      recipientID: contact.userID,
+      senderID: Global.loggedInUser.userID,
       content: myController.text,
       time: DateFormat.jm().format(DateTime.now()),
     );
@@ -89,17 +87,16 @@ class _ChatPageState extends State<ChatPage> {
 
   _connectSocket() async {
     Global.initSocket();
-    await Global.socketUtils.initSocket(contact1);
+    await Global.socketUtils.initSocket(Global.loggedInUser);
     Global.socketUtils.connectToSocket();
   }
 
   @override
   void initState() {
-    // print('${contact1.name} ${contact2.name}');
-    roomID = (group == null) ? contact2.userID : group.groupID;
+    roomID = (group == null) ? contact.userID : group.groupID;
     localMessages = List();
-    initSocketListeners();
     _connectSocket();
+    initSocketListeners();
     myController.addListener(onTextChange);
     super.initState();
   }
@@ -112,8 +109,6 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Provider.of<ChatModel>(context, listen: true).appendMessages();
-
     return SafeArea(
       child: Column(
         children: [
@@ -149,7 +144,7 @@ class _ChatPageState extends State<ChatPage> {
               topRight: Radius.circular(15),
               bottomRight: Radius.circular(15),
             ),
-            color: message.senderID == contact1.userID
+            color: message.senderID == Global.loggedInUser.userID
                 ? const Color(0x0f1f6b9c)
                 : const Color(0xee0a6da8),
           ),
@@ -163,7 +158,7 @@ class _ChatPageState extends State<ChatPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    message.senderID == contact1.userID
+                    message.senderID == Global.loggedInUser.userID
                         ? Text(
                             'You',
                             style: TextStyle(color: const Color(0xee0a6da8)),
@@ -192,9 +187,11 @@ class _ChatPageState extends State<ChatPage> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       child: ListView.builder(
-          itemBuilder: (BuildContext context, int index) =>
-              generateMessage(localMessages[index]),
-          itemCount: null == localMessages ? 0 : localMessages.length),
+        cacheExtent: 100,
+        itemCount: null == localMessages ? 0 : localMessages.length,
+        itemBuilder: (BuildContext context, int index) =>
+            generateMessage(localMessages[index]),
+      ),
     );
   }
 

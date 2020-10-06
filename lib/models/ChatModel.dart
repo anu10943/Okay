@@ -41,7 +41,7 @@ class ChatModel extends ChangeNotifier {
   }
 
   void init() {
-    currentUser = users[1]; // run as 1 2 3 in different devices
+    currentUser = users[0]; // run as 1 2 3 in different devices
 
     print('CURRENT USER: ${currentUser.userID}');
 
