@@ -1,5 +1,4 @@
-// Setting up the server and linking it to socket.io
-const express = require('express');
+ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
@@ -20,7 +19,7 @@ app.get('/', (req, res) => {
 });
 
 io.on("connection", (socket) => {
-
+    console.log(JSON.stringify(socket.id));
     initializeOnConnect(socket);
 });
 
@@ -30,10 +29,11 @@ const initializeOnConnect = (socket) => {
     // When a user logs in
 
  
-    var roomID =  socket.handshake.query.roomID;
+    const roomID =  socket.handshake.query.roomID;
  
-
+    console.log(JSON.stringify(socket.id)+"room id"+roomID);
     socket.join(roomID);
+    console.log(JSON.stringify(socket.id)+"room id after join"+roomID);
     // When the users sends a message
     onMessage(socket);
     // When the user logs out
@@ -42,14 +42,16 @@ const initializeOnConnect = (socket) => {
 
 const onMessage = (socket) => {
     // console.log("yo out",socket.rooms);
-    socket.on('send_message', (mes) => {
+    socket.on('send_message', (message) => {
         // console.log("yo in ");
-        let mes=JSON.stringify(mes);
-        let message=JSON.parse(message);
+        console.log("yo in ");
+        console.log(message);
+           
         let toID = message.receiverChatID;
         let fromID = message.senderChatID;
         let content = message.content;
         let time=message.time;
+        console.log(JSON.stringify(socket.id)+"msg to"+toID);
          
         // let check_online = checkOnline(toID);
 
@@ -59,10 +61,13 @@ const onMessage = (socket) => {
             "receiverChatID": toID,
             "time":time
         } ;
-        
-        
-            io.sockets.in(toID).emit('receive_message', response);
-        
+        let res=JSON.stringify(response);
+        let resp=JSON.parse(res);
+         console.log(res);
+        console.log(resp);
+        console.log("b4 receive");
+            io.sockets.in(toID).emit('receive_message', resp);
+        console.log("received?");
     })
     
 }
@@ -70,7 +75,9 @@ const onMessage = (socket) => {
  
 const disposeOnDisconnect = (socket,roomID) => {
     socket.on(events.ON_DISCONNECT, () => {
+        console.log(roomID+' user disconncected'+JSON.stringify(socket.id));
         socket.leave(roomID);
+        
          
     });
 
